@@ -67,6 +67,10 @@ func (p *InstagramPlugin) Check(ctx context.Context, target string) ([]models.Fi
 			Description: fmt.Sprintf("Instagram username '%s' is available", target),
 			Timestamp:   time.Now(),
 		})
+	case http.StatusForbidden, http.StatusTooManyRequests:
+		return nil, fmt.Errorf("instagram rate limit reached or access forbidden")
+	default:
+		return nil, fmt.Errorf("unexpected status code from instagram: %d", resp.StatusCode)
 	}
 
 	return findings, nil

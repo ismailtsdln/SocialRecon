@@ -66,6 +66,10 @@ func (p *GitHubPlugin) Check(ctx context.Context, target string) ([]models.Findi
 			Description: fmt.Sprintf("GitHub username '%s' is available for registration", target),
 			Timestamp:   time.Now(),
 		})
+	case http.StatusForbidden, http.StatusTooManyRequests:
+		return nil, fmt.Errorf("github rate limit reached or access forbidden")
+	default:
+		return nil, fmt.Errorf("unexpected status code from github: %d", resp.StatusCode)
 	}
 
 	return findings, nil

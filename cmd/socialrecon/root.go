@@ -118,10 +118,16 @@ func runScan(cmd *cobra.Command, args []string) error {
 			fmt.Printf("   -> Scanning username: %s\n", username)
 		}
 		res, err := eng.Run(ctx, username)
-		if err == nil {
+		if err != nil {
+			if !jsonOutput {
+				color.Red("   ❌ Error scanning %s: %v", username, err)
+			}
+		}
+		if res != nil {
 			finalResult.Findings = append(finalResult.Findings, res.Findings...)
 		}
 	}
+
 	finalResult.EndTime = time.Now()
 
 	// 4. Calculate risk score

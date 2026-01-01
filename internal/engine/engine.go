@@ -65,22 +65,40 @@ func (e *Engine) Run(ctx context.Context, target string) (*models.ScanResult, er
 	}()
 
 	// Collect findings
+	var errors []error
 CollectLoop:
 	for {
 		select {
 		case f, ok := <-findingChan:
 			if !ok {
-				break CollectLoop
+				findingChan = nil
+			} else {
+				result.Findings = append(result.Findings, f)
 			}
-			result.Findings = append(result.Findings, f)
+		case err, ok := <-errorChan:
+			if !ok {
+				errorChan = nil
+			} else if err != nil {
+				errors = append(errors, err)
+			}
 		case <-ctx.Done():
 			return nil, ctx.Err()
-		case <-errorChan:
-			// Log error but continue scanning with other plugins
-			continue
+		}
+
+		if findingChan == nil && errorChan == nil {
+			break CollectLoop
 		}
 	}
 
 	result.EndTime = time.Now()
+
+	if len(errors) > 0 {
+		// Return the first error for now, or we could wrap them
+		// For a scanner, returning results + errors might be better, but we follow the signature
+		if len(result.Findings) == 0 {
+			return result, errors[0]
+		}
+	}
+
 	return result, nil
 }

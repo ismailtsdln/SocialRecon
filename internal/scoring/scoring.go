@@ -21,9 +21,14 @@ func NewScoringEngine() *ScoringEngine {
 
 // Calculate assigns a cumulative risk score to the result
 func (e *ScoringEngine) Calculate(result *models.ScanResult) float64 {
+	if result == nil || len(result.Findings) == 0 {
+		return 0
+	}
+
 	var totalScore float64
 
-	for _, finding := range result.Findings {
+	for i := range result.Findings {
+		finding := &result.Findings[i]
 		weight, ok := e.weights[finding.Indicator]
 		if !ok {
 			weight = 5.0 // default weight for unknown indicators
@@ -40,6 +45,10 @@ func (e *ScoringEngine) Calculate(result *models.ScanResult) float64 {
 			finding.Severity = models.SeverityMedium
 		case "exists":
 			totalScore += weight * 0.2
+			finding.Severity = models.SeverityInfo
+		default:
+			// Handle unknown status gracefully
+			totalScore += weight * 0.1
 			finding.Severity = models.SeverityInfo
 		}
 	}

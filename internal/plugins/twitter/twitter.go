@@ -68,6 +68,10 @@ func (p *TwitterPlugin) Check(ctx context.Context, target string) ([]models.Find
 			Description: fmt.Sprintf("Twitter username '%s' is available or suspended", target),
 			Timestamp:   time.Now(),
 		})
+	case http.StatusForbidden, http.StatusTooManyRequests:
+		return nil, fmt.Errorf("twitter rate limit reached or access forbidden")
+	default:
+		return nil, fmt.Errorf("unexpected status code from twitter: %d", resp.StatusCode)
 	}
 
 	return findings, nil
