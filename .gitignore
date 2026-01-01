@@ -1,0 +1,17 @@
+# Go
+/socialrecon
+bin/
+dist/
+*.exe
+*.test
+*.prof
+
+# Dependencies
+vendor/
+
+# IDEs
+.idea/
+.vscode/
+
+# OS
+.DS_Store
