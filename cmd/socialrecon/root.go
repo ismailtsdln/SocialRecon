@@ -33,13 +33,22 @@ var (
 		RunE:  runScan,
 	}
 
-	// Flags
-	jsonOutput bool
-	verbose    bool
-)
+const banner = `
+   _____            _       _______                     
+  / ___/____  _____(_)___ _/ / ___/___  _________  ____ 
+  \__ \/ __ \/ ___/ / __ '/ / / __/ _ \/ ___/ __ \/ __ \
+ ___/ / /_/ / /__/ / /_/ / / / /_/  __/ /__/ /_/ / / / /
+/____/\____/\___/_/\__,_/_/_/\___/\___/\___/\____/_/ /_/ 
+                             v1.0.0 | Ismail Tasdelen
+`
+
+func PrintBanner() {
+	color.HiCyan(banner)
+}
 
 func init() {
 	scanCmd.Flags().BoolVar(&jsonOutput, "json", false, "Output results in JSON format")
+	scanCmd.Flags().StringVar(&htmlReport, "html-report", "", "Path to save HTML report")
 	scanCmd.Flags().BoolVar(&verbose, "verbose", false, "Enable verbose output")
 	rootCmd.AddCommand(scanCmd)
 }
@@ -50,8 +59,9 @@ func Execute() error {
 
 func runScan(cmd *cobra.Command, args []string) error {
 	target := args[0]
-
+	
 	if !jsonOutput {
+		PrintBanner()
 		color.Cyan("🚀 Starting SocialRecon scan for: %s", target)
 	}
 
@@ -116,8 +126,42 @@ func runScan(cmd *cobra.Command, args []string) error {
 	if jsonOutput {
 		reporter.ExportJSON(finalResult, "")
 	} else {
-		color.Green("✅ Scan completed in %v", finalResult.EndTime.Sub(finalResult.StartTime))
+		fmt.Println()
+		color.HiGreen("✅ Scan completed in %v", finalResult.EndTime.Sub(finalResult.StartTime))
+		
+		fmt.Printf("\n%-12s | %-15s | %-12s | %s\n", "PLATFORM", "STATUS", "SEVERITY", "FINDING")
+		fmt.Println(strings.Repeat("-", 80))
+		
+		for _, f := range finalResult.Findings {
+			statusColor := color.New(color.FgCyan).SprintFunc()
+			if f.Status == "available" {
+				statusColor = color.New(color.FgHiGreen, color.Bold).SprintFunc()
+			}
+
+			sevColor := color.New(color.FgBlue).SprintFunc()
+			switch f.Severity {
+			case models.SeverityHigh, models.SeverityCritical:
+				sevColor = color.New(color.FgRed, color.Bold).SprintFunc()
+			case models.SeverityMedium:
+				sevColor = color.New(color.FgYellow).SprintFunc()
+			}
+
+			fmt.Printf("%-12s | %-15s | %-12s | %s\n", 
+				f.PluginName, 
+				statusColor(f.Status), 
+				sevColor(f.Severity), 
+				f.Description,
+			)
+		}
+		
 		reporter.PrintSummary(finalResult)
+	}
+
+	if htmlReport != "" {
+		if err := reporter.ExportHTML(finalResult, htmlReport); err != nil {
+			return fmt.Errorf("failed to save HTML report: %w", err)
+		}
+		color.Cyan("📊 HTML report saved to: %s", htmlReport)
 	}
 
 	return nil
