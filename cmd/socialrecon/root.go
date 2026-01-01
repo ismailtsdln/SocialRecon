@@ -33,6 +33,12 @@ var (
 		RunE:  runScan,
 	}
 
+	// Flags
+	jsonOutput bool
+	htmlReport string
+	verbose    bool
+)
+
 const banner = `
    _____            _       _______                     
   / ___/____  _____(_)___ _/ / ___/___  _________  ____ 
@@ -59,7 +65,7 @@ func Execute() error {
 
 func runScan(cmd *cobra.Command, args []string) error {
 	target := args[0]
-	
+
 	if !jsonOutput {
 		PrintBanner()
 		color.Cyan("🚀 Starting SocialRecon scan for: %s", target)
@@ -128,10 +134,10 @@ func runScan(cmd *cobra.Command, args []string) error {
 	} else {
 		fmt.Println()
 		color.HiGreen("✅ Scan completed in %v", finalResult.EndTime.Sub(finalResult.StartTime))
-		
+
 		fmt.Printf("\n%-12s | %-15s | %-12s | %s\n", "PLATFORM", "STATUS", "SEVERITY", "FINDING")
 		fmt.Println(strings.Repeat("-", 80))
-		
+
 		for _, f := range finalResult.Findings {
 			statusColor := color.New(color.FgCyan).SprintFunc()
 			if f.Status == "available" {
@@ -146,14 +152,14 @@ func runScan(cmd *cobra.Command, args []string) error {
 				sevColor = color.New(color.FgYellow).SprintFunc()
 			}
 
-			fmt.Printf("%-12s | %-15s | %-12s | %s\n", 
-				f.PluginName, 
-				statusColor(f.Status), 
-				sevColor(f.Severity), 
+			fmt.Printf("%-12s | %-15s | %-12s | %s\n",
+				f.PluginName,
+				statusColor(f.Status),
+				sevColor(f.Severity),
 				f.Description,
 			)
 		}
-		
+
 		reporter.PrintSummary(finalResult)
 	}
 

@@ -5,13 +5,15 @@
 
 **SocialRecon** is a high-performance, open-source social media reconnaissance and OSINT security scanner. It identifies social media presence, abandoned profiles, impersonation risks, and brand abuse from domains or usernames.
 
+---
+
 ## 🚀 Key Features
 
-- **Concurrent Scanning**: Fast discovery using Go worker pools.
-- **Domain Discovery**: Automatically extracts social links from website HTML/JS.
-- **Risk Scoring**: Intelligent severity assessment (INFO to CRITICAL).
-- **Multi-Format Reporting**: Export results to CLI, JSON, or professional HTML dashboards.
-- **Modular Plugin System**: Easily extensible for new social platforms.
+- **Concurrent Scanning**: High-speed discovery using Go worker pools and goroutines.
+- **Domain Discovery**: Automatically extracts social links from website HTML, Meta tags, and JS.
+- **Risk Scoring Engine**: Intelligent severity assessment based on platform authority and profile status.
+- **Executive Reporting**: Export results to CLI (color-coded), JSON, or professional HTML dashboards.
+- **Modular Plugin System**: Easily extensible architecture for adding new platforms.
 
 ## 📦 Installation
 
@@ -30,39 +32,48 @@ socialrecon scan johndoe
 ### Scan a Domain (Discovery Mode)
 
 ```bash
-socialrecon scan example.com
+socialrecon scan example.com --verbose
 ```
 
-### Export HTML Report
+### Export HTML Dashboard
 
 ```bash
 socialrecon scan example.com --html-report report.html
 ```
 
-### JSON Output for Automation
+### Options
 
-```bash
-socialrecon scan johndoe --json
-```
+| Flag | Description |
+|------|-------------|
+| `--json` | Output results in machine-readable JSON format |
+| `--html-report [path]` | Generate a professional HTML report |
+| `--verbose` | Enable detailed scan logging |
 
 ## 🧠 Risk Scoring System
 
-SocialRecon uses a weighted scoring engine to evaluate OSINT findings:
+SocialRecon evaluates OSINT findings using a weighted algorithm:
 
 | Status | Risk Level | Description |
-|--------|------------|-------------|
-| **Available** | HIGH | Profile can be registered/hijacked. |
-| **Suspended** | MEDIUM | Platform-level enforcement detected. |
-| **Exists** | INFO | Passive profile discovery. |
+| :--- | :--- | :--- |
+| **Available** | HIGH | Profile is available for registration (potential hijacking/squatting). |
+| **Suspended** | MEDIUM | Profile exists but has been suspended by the platform. |
+| **Exists** | INFO | Social media presence identified for the specified target. |
 
-## 🛡️ Ethics & Legal Disclaimer
+## 🛡️ Threat Model & Ethics
 
-SocialRecon is designed for passive reconnaissance and authorized security testing.
+- **Passive Reconnaissance**: The tool only performs passive checks (HTTP GET) and does not interact with platform APIs in a way that requires credentials.
+- **No Credential Stuffing**: Does not attempt to log in or use leaked credentials.
+- **Legal Compliance**: Designed for authorized security audits, bug bounties, and brand protection.
 
-- No credential stuffing.
-- No brute-force checking.
-- Respects `robots.txt`.
-The author assumes no liability for misuse.
+## 🤝 Contribution
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the Repository
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 📄 License
 
